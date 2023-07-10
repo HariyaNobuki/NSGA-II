@@ -2,18 +2,20 @@ import math
 import random
 import matplotlib.pyplot as plt
 
+population = 20
+max_gen = 11
+min_value= -20
+max_value= 20
+
 def objective1(x):
     y = -x**3
     return y
 
 def objective2(x):
     y = -(x-2)**2
+    #y = -x**2
     return y
 
-population = 20
-max_gen = 501
-min_value= -100
-max_value= 100
 
 def index_locator(a,list):
     for i in range(0,len(list)):
@@ -96,6 +98,8 @@ def nsga2(population,max_gen,min_value,max_value):
     while(gen_no<max_gen):
         objective1_values = [objective1(solution[i])for i in range(0,population)]
         objective2_values = [objective2(solution[i])for i in range(0,population)]
+        #print("objective1_values : ",objective1_values)
+        #print("objective2_values : ",objective2_values)
         non_dominated_sorted_solution = non_dominated_sorting_algorithm(objective1_values[:],objective2_values[:])
         print('Best Front for Generation:',gen_no)
         for values in non_dominated_sorted_solution[0]:
@@ -104,7 +108,7 @@ def nsga2(population,max_gen,min_value,max_value):
         crowding_distance_values=[]
         for i in range(0,len(non_dominated_sorted_solution)):
             crowding_distance_values.append(crowding_distance(objective1_values[:],objective2_values[:],non_dominated_sorted_solution[i][:]))
-        solution2 = solution[:]
+        solution2 = solution[:] # offspring??
         
         while(len(solution2)!=2*population):
             a1 = random.randint(0,population-1)
@@ -130,17 +134,17 @@ def nsga2(population,max_gen,min_value,max_value):
                 break
         solution = [solution2[i] for i in new_solution]
         gen_no = gen_no + 1
-    return [objective1_values, objective2_values]
+    return [objective1_values, objective2_values ,non_dominated_sorted_solution]
 
 def non_dominating_curve_plotter(objective1_values, objective2_values):
     fig = plt.figure(figsize=(15,8))
-    objective1 = [i * -1 for i in objective1_values]
-    objective2 = [j * -1 for j in objective2_values]
+    objective1 = [i  for i in objective1_values]
+    objective2 = [j  for j in objective2_values]
     plt.xlabel('Objective Function 1', fontsize=15)
     plt.ylabel('Objective Function 2', fontsize=15)
     plt.scatter(objective1, objective2, c='red', s=25)
     fig.savefig("non_dominated.png",dpi=600)
 
 if __name__ == '__main__':
-    objective1_values, objective2_values = nsga2(population,max_gen,min_value,max_value)
+    objective1_values, objective2_values , non_dominated_sorted_solution = nsga2(population,max_gen,min_value,max_value)
     non_dominating_curve_plotter(objective1_values, objective2_values)
